@@ -1,0 +1,49 @@
+version: '3.3'
+services:
+
+  ha:
+    network_mode: "host"
+    user: "1000:1000"
+    container_name: homeassistant
+    volumes:
+      - './config:/config'
+      - /etc/localtime:/etc/localtime:ro
+    image: 'homeassistant/raspberrypi3-homeassistant:latest'
+    privileged: true
+    ports:
+      - 8123:8123
+#    command: [ "python3", "-m", "homeassistant", "--config", "/config" ] #, "--skip-pip"]
+    depends_on:
+      - db
+      - mqtt
+
+  db:
+    user: "1000:1000"
+    network_mode: "host"
+    container_name: mariadb
+    image: yobasystems/alpine-mariadb
+    restart: unless-stopped
+    volumes:
+      - ./mariadb/config:/etc/mysql/conf.d
+      - ./mariadb/data:/var/lib/mysql
+    environment:
+      TZ: Europe/Berlin
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: homeassistant
+      MYSQL_USER: homeassistant
+      MYSQL_PASSWORD: homeassistant
+
+  mqtt:
+    user: "1000:1000"
+    image: eclipse-mosquitto:latest
+    container_name: mqtt
+    restart: always
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - './mosquitto_data:/mosquitto/data'
+      - './mosquitto_data:/mosquitto/log'
+
+    environment:
+      - TZ=Europe/Berlin

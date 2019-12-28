@@ -1,0 +1,8 @@
+*
+!docker-compose.yml
+!*/
+!/config/configuration.yaml
+!/misc/*
+
+!README.md
+!.gitignore
